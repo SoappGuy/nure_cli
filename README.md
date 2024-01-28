@@ -1,4 +1,4 @@
-# cli tool for nure_cli crate  
+# CLI tool for nure_tools crate  
 > **Warning**
 > This CLI is still under development. I will be happy to receive any feedback, and you can feel free to improve my code
 
