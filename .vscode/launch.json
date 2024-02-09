@@ -10,9 +10,8 @@
             "name": "Debug executable 'nure_cli'",
             "cargo": {
                 "args": [
-                    "build",
-                    "--bin=nure_cli",
-                    "--package=nure_cli"
+                    "run",
+                    "-- schedule teacher \"Новіков\" -w -s=2024-01-02"
                 ],
                 "filter": {
                     "name": "nure_cli",

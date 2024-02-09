@@ -1,24 +1,48 @@
-use clap::Subcommand;
-use color_eyre::Result;
+use anyhow::{anyhow, Result};
+use clap::{builder::PossibleValue, ValueEnum};
 use nure_tools::{groups::find_group, lecture_rooms::find_lecture_room, teachers::find_teacher};
 
-#[derive(Subcommand)]
+// #[derive(Subcommand)]
+// pub enum Search {
+//     /// Search for group
+//     #[command(arg_required_else_help = true)]
+//     Group { name: String },
+//     /// Search for teacher
+//     #[command(arg_required_else_help = true)]
+//     Teacher { name: String },
+//     /// Search for lecture-room
+//     #[command(arg_required_else_help = true)]
+//     LectureRoom { name: String },
+// }
+
+#[derive(Clone, Debug)]
 pub enum Search {
-    /// Search for group
-    #[command(arg_required_else_help = true)]
-    Group { name: String },
-    /// Search for teacher
-    #[command(arg_required_else_help = true)]
-    Teacher { name: String },
-    /// Search for lecture-room
-    #[command(arg_required_else_help = true)]
-    LectureRoom { name: String },
+    Group,
+    Teacher,
+    LectureRoom,
 }
 
-pub fn match_search(search_type: Option<Search>) -> Result<()> {
+impl ValueEnum for Search {
+    fn value_variants<'a>() -> &'a [Self] {
+        &[Self::Group, Self::Teacher, Self::LectureRoom]
+    }
+
+    fn to_possible_value(&self) -> Option<clap::builder::PossibleValue> {
+        Some(match self {
+            Self::Group => PossibleValue::new("group"),
+            Self::Teacher => PossibleValue::new("teacher"),
+            Self::LectureRoom => PossibleValue::new("lecture_room"),
+        })
+    }
+}
+
+pub fn match_search(search_type: Search, name: &str) -> Result<()> {
     match search_type {
-        Some(Search::Group { name }) => {
-            let mut groups = find_group(name.as_str())?;
+        Search::Group => {
+            let mut groups = match find_group(name) {
+                Ok(value) => value,
+                Err(error) => return Err(anyhow!(error)),
+            };
             match groups.len() {
                 0 => {
                     println!("Didn't find any groups matching '{}'", name);
@@ -35,8 +59,11 @@ pub fn match_search(search_type: Option<Search>) -> Result<()> {
                 }
             }
         }
-        Some(Search::Teacher { name }) => {
-            let mut teachers = find_teacher(name.as_str())?;
+        Search::Teacher => {
+            let mut teachers = match find_teacher(name) {
+                Ok(value) => value,
+                Err(error) => return Err(anyhow!(error)),
+            };
             match teachers.len() {
                 0 => {
                     println!("Didn't find any teachers matching '{}'", name);
@@ -53,8 +80,11 @@ pub fn match_search(search_type: Option<Search>) -> Result<()> {
                 }
             }
         }
-        Some(Search::LectureRoom { name }) => {
-            let mut lecture_rooms = find_lecture_room(name.as_str())?;
+        Search::LectureRoom => {
+            let mut lecture_rooms = match find_lecture_room(name) {
+                Ok(value) => value,
+                Err(error) => return Err(anyhow!(error)),
+            };
             match lecture_rooms.len() {
                 0 => {
                     println!("Didn't find any lecture_rooms matching '{}'", name);
@@ -70,9 +100,6 @@ pub fn match_search(search_type: Option<Search>) -> Result<()> {
                     }
                 }
             }
-        }
-        None => {
-            println!("What to search?, see `nure_cli search help`");
         }
     }
 
