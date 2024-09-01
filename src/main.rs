@@ -2,6 +2,8 @@ mod schedule;
 mod search;
 mod utils;
 
+use std::u8;
+
 use crate::{
     schedule::{match_schedule, SearchType},
     search::{match_search, Search},
@@ -34,6 +36,11 @@ enum Commands {
         search_type: SearchType,
         /// Name to search.
         name: String,
+        /** Limit for pairs to print.
+        Default = 255
+        */
+        #[arg(short, long = "limit", verbatim_doc_comment)]
+        limit: Option<u8>,
         /// If set will get schedule for week around <START> time
         /// or around current/next day.
         #[arg(short, long = "week", action = clap::ArgAction::SetTrue)]
@@ -73,10 +80,14 @@ enum Commands {
         #[arg(long = "sep", verbatim_doc_comment)]
         lecture_separator: Option<String>,
         /** Each Day label.
-        Default = "day"
+        Default = "{%A}"
         */
         #[arg(long = "label", verbatim_doc_comment)]
         day_label: Option<String>,
+        /// If set will get schedule for week around <START> time
+        /// or around current/next day.
+        #[arg(long = "no_labels", action = clap::ArgAction::SetTrue)]
+        no_labels: bool,
     },
 }
 
@@ -100,6 +111,8 @@ fn main() -> Result<()> {
             start_time,
             end_time,
             day_label,
+            limit,
+            no_labels,
         }) => {
             let format =
                 &format.unwrap_or("{number_pair}: {subject.brief} - {lecture_type}".to_string());
@@ -108,14 +121,22 @@ fn main() -> Result<()> {
                 .unwrap_or("\n".to_string())
                 .replace("\\n", "\n");
 
-            let day_label = &day_label.unwrap_or("%A".to_string());
+            let temp = day_label.unwrap_or("{%A}".to_string());
+            let day_label_format = if !no_labels {
+                Some(temp.as_str())
+            } else {
+                None
+            };
 
             let schedule =
                 match match_schedule(search_type, &name, week, next, start_time, end_time) {
                     Ok(value) => value,
                     Err(error) => return Ok(println!("{}", error)),
                 };
-            format_string(format, lecture_separator, day_label, schedule);
+
+            let limit = limit.unwrap_or(u8::MAX);
+
+            format_string(format, lecture_separator, day_label_format, limit, schedule);
         }
         None => {
             println!("Please provide a valid command, see `nure_cli help`");

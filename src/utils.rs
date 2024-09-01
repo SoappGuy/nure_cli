@@ -3,7 +3,12 @@ use chrono::DateTime;
 use chrono_tz::Tz;
 use core::fmt;
 use dialoguer::Select;
-use nure_tools::{groups::Group, lecture_rooms::LectureRoom, schedule::Lecture, teachers::Teacher};
+use nure_tools::{
+    groups::Group,
+    lecture_rooms::LectureRoom,
+    schedule::{self, Lecture},
+    teachers::Teacher,
+};
 use runtime_format::{FormatArgs, FormatKey, FormatKeyError};
 
 // pub fn split_days(schedule: Vec<Lecture>) -> Result<Vec<Day>> {
@@ -66,31 +71,41 @@ pub fn split_days(schedule: Vec<Lecture>) -> Result<Vec<Day>> {
     Ok(daily_chunks)
 }
 
-pub fn format_string(format: &str, lecture_separator: &str, day_lable: &str, schedule: Vec<Day>) {
-    let mut formated;
-    let foramted = format!("{{{}}}", day_lable);
-    let day_lable = foramted.as_str();
-    for day in schedule {
-        formated = String::new();
+pub fn format_string(
+    format: &str,
+    lecture_separator: &str,
+    day_label_format: Option<&str>,
+    limit: u8,
+    schedule: Vec<Day>,
+) {
+    let mut formated = String::new();
 
-        formated += &FormatArgs::new(day_lable, &day).to_string();
-        if !formated.is_empty() {
+    for day in schedule {
+        formated.truncate(0);
+
+        if let Some(day_label_format) = day_label_format {
+            formated += &FormatArgs::new(day_label_format, &day).to_string();
             formated += lecture_separator;
         }
 
-        if day.lectures.is_empty() {
+        if day.lectures.is_empty() && limit != 0 {
             formated += "No lectures";
             formated += lecture_separator;
         } else {
-            for lecture in day.lectures {
+            for (processed, lecture) in day.lectures.into_iter().enumerate() {
+                if processed == (limit) as usize {
+                    break;
+                }
+
                 let wrapped = LectureWrapper { lecture };
                 let result = FormatArgs::new(format, &wrapped);
+
                 formated += &result.to_string();
                 formated += lecture_separator;
             }
         }
 
-        println!("{formated}")
+        println!("{formated}");
     }
 }
 
