@@ -71,10 +71,16 @@ pub fn format_string(format: &str, lecture_separator: &str, day_lable: &str, sch
     let foramted = format!("{{{}}}", day_lable);
     let day_lable = foramted.as_str();
     for day in schedule {
-        println!("{}", FormatArgs::new(day_lable, &day));
         formated = String::new();
+
+        formated += &FormatArgs::new(day_lable, &day).to_string();
+        if !formated.is_empty() {
+            formated += lecture_separator;
+        }
+
         if day.lectures.is_empty() {
-            println!("No lectures{lecture_separator}")
+            formated += "No lectures";
+            formated += lecture_separator;
         } else {
             for lecture in day.lectures {
                 let wrapped = LectureWrapper { lecture };
@@ -82,8 +88,9 @@ pub fn format_string(format: &str, lecture_separator: &str, day_lable: &str, sch
                 formated += &result.to_string();
                 formated += lecture_separator;
             }
-            println!("{formated}")
         }
+
+        println!("{formated}")
     }
 }
 
