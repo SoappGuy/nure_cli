@@ -696,7 +696,7 @@ dependencies = [
 
 [[package]]
 name = "nure_cli"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "chrono",
@@ -710,9 +710,9 @@ dependencies = [
 
 [[package]]
 name = "nure_tools"
-version = "1.2.2"
+version = "1.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a143ecd56f70f75519e85589b74e5df9cbeeed72c5a0e989133da4f80707b1ed"
+checksum = "f93448381fdde31304cab573081a4d8a317785b5b60ac3b7f5076c09596775c9"
 dependencies = [
  "anyhow",
  "chrono",

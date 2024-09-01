@@ -74,13 +74,13 @@ pub fn format_string(format: &str, lecture_separator: &str, day_lable: &str, sch
         println!("{}", FormatArgs::new(day_lable, &day));
         formated = String::new();
         if day.lectures.is_empty() {
-            println!("  No lectures\n")
+            println!("No lectures{lecture_separator}")
         } else {
             for lecture in day.lectures {
                 let wrapped = LectureWrapper { lecture };
                 let result = FormatArgs::new(format, &wrapped);
                 formated += &result.to_string();
-                formated += &lecture_separator;
+                formated += lecture_separator;
             }
             println!("{formated}")
         }
@@ -150,12 +150,10 @@ impl FormatKey for LectureWrapper {
             "lecture_room" => {
                 write!(f, "{}", self.lecture.lecture_room).map_err(FormatKeyError::Fmt)
             }
-            "start_time" => {
-                write!(f, "{}", self.lecture.period.start_time).map_err(FormatKeyError::Fmt)
-            }
-            "end_time" => {
-                write!(f, "{}", self.lecture.period.end_time).map_err(FormatKeyError::Fmt)
-            }
+            "start_time" => write!(f, "{}", self.lecture.period.start_time.format("%H:%M"))
+                .map_err(FormatKeyError::Fmt),
+            "end_time" => write!(f, "{}", self.lecture.period.end_time.format("%H:%M"))
+                .map_err(FormatKeyError::Fmt),
             "number_pair" => write!(f, "{}", self.lecture.number_pair).map_err(FormatKeyError::Fmt),
             "lecture_type" => {
                 write!(f, "{}", self.lecture.lecture_type).map_err(FormatKeyError::Fmt)
