@@ -81,8 +81,6 @@ pub fn format_string(
     let mut formated = String::new();
 
     for day in schedule {
-        formated.truncate(0);
-
         if let Some(day_label_format) = day_label_format {
             formated += &FormatArgs::new(day_label_format, &day).to_string();
             formated += lecture_separator;
@@ -105,8 +103,12 @@ pub fn format_string(
             }
         }
 
-        println!("{formated}");
+        formated += lecture_separator;
     }
+
+    formated.truncate(formated.len() - lecture_separator.len());
+
+    print!("{formated}");
 }
 
 pub fn select_group(groups: Vec<Group>) -> Group {
